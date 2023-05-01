@@ -30,10 +30,10 @@ var opsTmpl = `
 	}
 
 	type {{$privateType}} struct {
-		client Client
+		client SOAPClient
 	}
 
-	func New{{$exportType}}(client Client) {{$exportType}} {
+	func New{{$exportType}}(client SOAPClient) {{$exportType}} {
 		return &{{$privateType}}{
 			client: client,
 		}

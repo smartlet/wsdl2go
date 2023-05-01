@@ -2,8 +2,8 @@ package extend
 
 import "context"
 
-// Client SOAP Client interface
-type Client interface {
+// SOAPClient SOAP SOAPClient interface
+type SOAPClient interface {
 	CallContext(ctx context.Context, soapAction string, request, response interface{}) error
 }
 
