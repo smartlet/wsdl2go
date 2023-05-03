@@ -555,9 +555,10 @@ func toGoType(xsdType string, nillable bool) string {
 
 	value := xsd2GoTypes[strings.ToLower(xsdType)] // 不忽略大小写
 	if value != "" {
-		if nillable {
-			value = "*" + value
-		}
+		// 所有Xsd类型都是基本类型!
+		//if nillable {
+		//	value = "*" + value
+		//}
 		return value
 	}
 
