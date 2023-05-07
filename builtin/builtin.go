@@ -1,11 +1,4 @@
-package extend
-
-import "context"
-
-// SOAPClient SOAP SOAPClient interface
-type SOAPClient interface {
-	Call(ctx context.Context, soapAction string, request, response interface{}) error
-}
+package builtin
 
 // XsDuration https://www.w3.org/TR/xmlschema-2/#duration
 type XsDuration string
