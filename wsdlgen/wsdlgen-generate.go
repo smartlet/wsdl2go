@@ -2,7 +2,7 @@ package wsdlgen
 
 import (
 	"fmt"
-	"github.com/smartletn/wsdlgen/builtin"
+	"github.com/smartletn/wsdl2go/builtin"
 )
 
 func generateBuiltinType(c *Context, buf *Buffer) {

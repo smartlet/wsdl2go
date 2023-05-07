@@ -2,7 +2,7 @@ package wsdlgen
 
 import (
 	_ "embed"
-	"github.com/smartletn/wsdlgen/builtin"
+	"github.com/smartletn/wsdl2go/builtin"
 	"strings"
 )
 

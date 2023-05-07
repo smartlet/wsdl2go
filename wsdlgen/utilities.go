@@ -1,7 +1,7 @@
 package wsdlgen
 
 import (
-	"github.com/smartletn/wsdlgen/wsdl"
+	"github.com/smartletn/wsdl2go/wsdl"
 	"regexp"
 	"strings"
 )
