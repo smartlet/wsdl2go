@@ -11,6 +11,9 @@ func generateBuiltinType(c *Context, buf *Buffer) {
 
 func generateSimpleType(c *Context, buf *Buffer, ts []*SimpleType) {
 	for _, t := range ts {
+		if t.deprecated {
+			continue
+		}
 		gname := Identifier(t.Name)
 		if t.Base != nil {
 			buf.Line("type %s %v\n", gname, TypeName(t.Base))
@@ -77,7 +80,9 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 	*/
 
 	for _, t := range ts {
-
+		if t.deprecated {
+			continue
+		}
 		gname := Identifier(t.Name)
 
 		if len(t.Attributes) == 0 && len(t.Elements) == 0 {

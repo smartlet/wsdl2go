@@ -55,8 +55,8 @@ func ElementFieldTypeName(e *Element) string {
 type BuiltinType string
 
 type SimpleType struct {
-	Ns             string //  namespace
-	Name           string // local name
+	Ns             string // namespace
+	Name           string // local name. 为空表示处理过程被删除掉了.
 	Base           Type   // BuiltinType/SimpleType
 	MinExclusive   []string
 	MinInclusive   []string
@@ -72,11 +72,12 @@ type SimpleType struct {
 	Enumeration    []string
 	List           Type   // list的itemType
 	Union          []Type // union的列表
+	deprecated     bool   // 表示处理过程被舍弃
 }
 
 type ComplexType struct {
-	Ns             string //  namespace
-	Name           string // local name
+	Ns             string // namespace
+	Name           string // local name. 为空表示处理过程被删除掉了.
 	Base           Type
 	MinExclusive   []string
 	MinInclusive   []string
@@ -92,6 +93,7 @@ type ComplexType struct {
 	Enumeration    []string
 	Attributes     []*Attribute
 	Elements       []*Element
+	deprecated     bool // 表示处理过程被舍弃
 }
 
 type Attribute struct {
