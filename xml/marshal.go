@@ -498,7 +498,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 	} else if tinfo.xmlname != nil {
 		xmlname := tinfo.xmlname
 		if xmlname.name != "" {
-			start.Name.Space, start.Name.Local = xmlname.xmlns, xmlname.local
+			start.Name.Space, start.Name.Local = xmlname.xmlns, xmlname.name
 		} else {
 			fv := xmlname.value(val, dontInitNilPointers)
 			if v, ok := fv.Interface().(Name); ok && v.Local != "" {
@@ -507,7 +507,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		}
 	}
 	if start.Name.Local == "" && finfo != nil {
-		start.Name.Space, start.Name.Local = finfo.xmlns, finfo.local
+		start.Name.Space, start.Name.Local = finfo.xmlns, finfo.name
 	}
 	if start.Name.Local == "" {
 		name := typ.Name()
@@ -537,7 +537,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 			continue
 		}
 
-		name := Name{Space: finfo.xmlns, Local: finfo.local}
+		name := Name{Space: finfo.xmlns, Local: finfo.name}
 		if err := p.marshalAttr(&start, name, fv); err != nil {
 			return err
 		}
@@ -664,7 +664,7 @@ func defaultStart(typ reflect.Type, finfo *fieldInfo, startTemplate *StartElemen
 		start.Name = startTemplate.Name
 		start.Attr = append(start.Attr, startTemplate.Attr...)
 	} else if finfo != nil && finfo.name != "" {
-		start.Name.Local = finfo.local
+		start.Name.Local = finfo.name
 		start.Name.Space = finfo.xmlns
 	} else if typ.Name() != "" {
 		start.Name.Local = typ.Name()

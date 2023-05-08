@@ -438,7 +438,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		// Validate and assign element name.
 		if tinfo.xmlname != nil {
 			finfo := tinfo.xmlname
-			if finfo.name != "" && finfo.local != start.Name.Local {
+			if finfo.name != "" && local(finfo.name) != start.Name.Local {
 				return UnmarshalError("expected element type <" + finfo.name + "> but have <" + start.Name.Local + ">")
 			}
 			if finfo.xmlns != "" && finfo.xmlns != start.Name.Space {
@@ -465,7 +465,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 				switch finfo.flags & fMode {
 				case fAttr:
 					strv := finfo.value(sv, initNilPointers)
-					if a.Name.Local == finfo.local && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
+					if a.Name.Local == local(finfo.name) && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
 						if err := d.unmarshalAttr(strv, a); err != nil {
 							return err
 						}
@@ -702,11 +702,11 @@ Loop:
 				continue Loop
 			}
 		}
-		if len(finfo.parents) == len(parents) && finfo.local == start.Name.Local {
+		if len(finfo.parents) == len(parents) && local(finfo.name) == start.Name.Local {
 			// It's a perfect match, unmarshal the field.
 			return true, d.unmarshal(finfo.value(sv, initNilPointers), start, depth+1)
 		}
-		if len(finfo.parents) > len(parents) && finfo.parents[len(parents)] == start.Name.Local {
+		if len(finfo.parents) > len(parents) && local(finfo.parents[len(parents)]) == start.Name.Local {
 			// It's a prefix for the field. Break and recurse
 			// since it's not ok for one field path to be itself
 			// the prefix for another field path.
