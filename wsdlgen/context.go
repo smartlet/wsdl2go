@@ -45,6 +45,14 @@ type Context struct {
 	traceWriter       io.WriteCloser
 }
 
+func (c *Context) QName(ns, name string) string {
+	pre := c.prefixes[ns]
+	if pre != "" {
+		return pre + ":" + name
+	}
+	return name
+}
+
 func (c *Context) trace(format string, args ...any) {
 	if c.traceWriter == nil {
 		c.traceWriter, _ = os.Create(`E:\temp\trace.log`)

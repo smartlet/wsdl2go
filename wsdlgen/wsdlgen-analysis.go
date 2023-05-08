@@ -304,6 +304,9 @@ func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, m
 		if e.Name != name {
 			panic(" invalid ref: " + e.Ref)
 		}
+		// FIXBUG: ref
+		rt.Ns = ns
+		rt.Name = e.Name
 	}
 
 	rt.Default = e.Default

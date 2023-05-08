@@ -1,6 +1,7 @@
 package wsdlgen
 
 import (
+	"fmt"
 	"io"
 	"sync"
 	"unicode/utf8"
@@ -25,6 +26,11 @@ func NewBuffer(c int) *Buffer {
 		cap: c,
 		buf: make([]byte, c),
 	}
+}
+
+func (b *Buffer) Line(format string, args ...any) {
+	fmt.Fprintf(b, format, args...)
+	b.WriteByte('\n')
 }
 
 func (b *Buffer) Len() int {

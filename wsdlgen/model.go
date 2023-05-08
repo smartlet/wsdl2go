@@ -10,14 +10,46 @@ type Type any // BuiltinType/SimpleType/ComplexType
 
 func TypeName(t Type) string {
 	switch t := t.(type) {
+	case nil:
+		return "any"
 	case BuiltinType:
-		return string(t)
+		return Identifier(string(t))
 	case *SimpleType:
-		return t.Name
+		return Identifier(t.Name)
 	case *ComplexType:
-		return t.Name
+		return Identifier(t.Name)
 	}
 	panic("invalid type")
+}
+
+func FieldTypeName(t Type) string {
+	switch t := t.(type) {
+	case nil:
+		return "any"
+	case BuiltinType:
+		return Identifier(string(t))
+	case *SimpleType:
+		return Identifier(t.Name)
+	case *ComplexType:
+		// FIXBUG: any接口
+		if t.Base == nil && len(t.Attributes) == 0 && len(t.Elements) == 0 {
+			return Identifier(t.Name)
+		}
+		return "*" + Identifier(t.Name)
+	}
+	panic("invalid type")
+}
+
+func ElementFieldTypeName(e *Element) string {
+
+	var p string
+
+	if e.MaxOccurs == "" || e.MaxOccurs == "0" || e.MaxOccurs == "1" {
+		p = ""
+	} else {
+		p = "[]"
+	}
+	return p + FieldTypeName(e.Type)
 }
 
 type BuiltinType string
