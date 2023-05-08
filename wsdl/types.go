@@ -13,8 +13,8 @@ type Definitions struct {
 	Namespaces      map[string]string `xml:"-"`
 	Schema          Schema            `xml:"types>schema"`
 	Messages        []*Message        `xml:"message"`
-	PortType        *PortType         `xml:"portType"` // TODO: PortType slice?
-	Binding         *Binding          `xml:"binding"`
+	PortType        []*PortType       `xml:"portType"` // TODO: PortType slice?
+	Binding         []*Binding        `xml:"binding"`
 }
 
 func (def *Definitions) QName(qname string) (string, string) {

@@ -8,50 +8,6 @@ import (
 
 type Type any // BuiltinType/SimpleType/ComplexType
 
-func TypeName(t Type) string {
-	switch t := t.(type) {
-	case nil:
-		return "any"
-	case BuiltinType:
-		return Identifier(string(t))
-	case *SimpleType:
-		return Identifier(t.Name)
-	case *ComplexType:
-		return Identifier(t.Name)
-	}
-	panic("invalid type")
-}
-
-func FieldTypeName(t Type) string {
-	switch t := t.(type) {
-	case nil:
-		return "any"
-	case BuiltinType:
-		return Identifier(string(t))
-	case *SimpleType:
-		return Identifier(t.Name)
-	case *ComplexType:
-		// FIXBUG: any接口
-		if t.Base == nil && len(t.Attributes) == 0 && len(t.Elements) == 0 {
-			return Identifier(t.Name)
-		}
-		return "*" + Identifier(t.Name)
-	}
-	panic("invalid type")
-}
-
-func ElementFieldTypeName(e *Element) string {
-
-	var p string
-
-	if e.MaxOccurs == "" || e.MaxOccurs == "0" || e.MaxOccurs == "1" {
-		p = ""
-	} else {
-		p = "[]"
-	}
-	return p + FieldTypeName(e.Type)
-}
-
 type BuiltinType string
 
 type SimpleType struct {
@@ -121,11 +77,69 @@ type Message struct {
 	Parts *NamedSlice[*Element]
 }
 
+type Binding struct {
+	Ns         string
+	Name       string
+	PortType   *PortType
+	Operations *NamedSlice[*Operation]
+}
+
+type Operation struct {
+	Ns            string
+	Name          string
+	Input         *Message
+	Output        *Message
+	SoapAction11  string
+	SoapAction12  string
+	InputHeaders  []*Element
+	OutputHeaders []*Element
+	InputBody     *Element
+	OutputBody    *Element
+}
+
+type PortType struct {
+	Ns         string
+	Name       string
+	Operations *NamedSlice[*Operation]
+}
+
 func Builtin(ns, name string) BuiltinType {
 	if strings.ToLower(ns) == "http://www.w3.org/2001/xmlschema" {
 		return BuiltinType(builtin.Type(name))
 	}
 	return ""
+}
+
+func TypeName(t Type) string {
+	switch t := t.(type) {
+	case nil:
+		return "any"
+	case BuiltinType:
+		return Identifier(string(t))
+	case *SimpleType:
+		return Identifier(t.Name)
+	case *ComplexType:
+		return Identifier(t.Name)
+	}
+	panic("invalid type")
+}
+
+func PointerTypeName(t Type) string {
+	switch t := t.(type) {
+	case nil:
+		return "any"
+	case BuiltinType:
+		return Identifier(string(t))
+	case *SimpleType:
+		return Identifier(t.Name)
+	case *ComplexType:
+		// FIXBUG: any接口
+		if t.Base == nil && len(t.Attributes) == 0 && len(t.Elements) == 0 {
+			return Identifier(t.Name)
+		}
+		return "*" + Identifier(t.Name)
+	}
+	panic("invalid type")
 }
 
 var defaultPrefix = map[string]string{

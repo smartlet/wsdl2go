@@ -18,6 +18,8 @@ func NewContext(path string) *Context {
 		namedComplexTypes: NewNsNamedSlice[*ComplexType](),
 		innerComplexTypes: NewNsOrderSlice[*ComplexType](),
 		namedMessages:     NewNsNamedSlice[*Message](),
+		namedPortTypes:    NewNamedSlice[*PortType](),
+		namedBindings:     NewNamedSlice[*Binding](),
 		prefixes:          make(map[string]string),
 	}
 
@@ -31,14 +33,16 @@ func NewContext(path string) *Context {
 
 type Context struct {
 	wsdl              string
-	base              string                      // 目录. 用于相对路径的处理.
-	schemas           *NamedSlice[*wsdl.Schema]   // 根据targetNamespace索引
+	base              string                    // 目录. 用于相对路径的处理.
+	schemas           *NamedSlice[*wsdl.Schema] // 根据targetNamespace索引
+	definitions       *wsdl.Definitions
 	namedSimpleTypes  *NsNamedSlice[*SimpleType]  // 顶层带有name可以被ref的simpleType
 	innerSimpleTypes  *NsOrderSlice[*SimpleType]  // 在element/attribute/base内声明的无name的simpleType
 	namedComplexTypes *NsNamedSlice[*ComplexType] // 顶层带有name可以被ref的complexType
 	innerComplexTypes *NsOrderSlice[*ComplexType] // 在element/attribute/base内声明的无name的complexType
 	namedMessages     *NsNamedSlice[*Message]     // 顶层带有name可以被ref的message
-	definitions       *wsdl.Definitions
+	namedPortTypes    *NamedSlice[*PortType]
+	namedBindings     *NamedSlice[*Binding]
 	prefixes          map[string]string
 	traceWriter       io.WriteCloser
 }

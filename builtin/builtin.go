@@ -131,3 +131,6 @@ type XsUnsignedByte uint8
 
 // XsPositiveInteger https://www.w3.org/TR/xmlschema-2/#positiveInteger
 type XsPositiveInteger int64
+
+// SOAPClient
+type SOAP

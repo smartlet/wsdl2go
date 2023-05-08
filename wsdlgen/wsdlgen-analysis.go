@@ -9,13 +9,87 @@ func analysisDefinitions(c *Context) {
 
 	c.trace("analysisDefinitions...")
 
-	var ns, name string
-	for _, op := range c.definitions.PortType.Operations {
-		ns, name = c.definitions.QName(op.Input.Message)
-		analysisNamedMessage(c, ns, name)
-		ns, name = c.definitions.QName(op.Output.Message)
-		analysisNamedMessage(c, ns, name)
+	ds := c.definitions
+
+	for _, pt := range c.definitions.PortType {
+		rt := &PortType{Ns: ds.TargetNamespace, Name: pt.Name}
+		if c.namedPortTypes.Set(rt.Name, rt) {
+			panic("duplicate portType: " + rt.Name)
+		}
+		processNamedPortType(c, ds, pt, rt)
 	}
+
+	for _, bd := range c.definitions.Binding {
+		_, name := ds.QName(bd.Type)
+		pt := c.namedPortTypes.Get(name)
+		if pt == nil {
+			panic("unknown portType: " + name)
+		}
+		rt := &Binding{Ns: ds.TargetNamespace, Name: bd.Name, PortType: pt}
+		if c.namedBindings.Set(rt.Name, rt) {
+			panic("duplicate binding: " + rt.Name)
+		}
+		processNamedBinding(c, ds, bd, rt)
+	}
+}
+
+func processNamedPortType(c *Context, ds *wsdl.Definitions, pt *wsdl.PortType, rt *PortType) *PortType {
+	var ns, name string
+	rt.Operations = NewNamedSlice[*Operation]()
+	for _, i := range pt.Operations {
+		op := &Operation{Ns: ds.TargetNamespace, Name: i.Name}
+		if rt.Operations.Set(op.Name, op) {
+			panic("duplicate operation: " + op.Name)
+		}
+		ns, name = ds.QName(i.Input.Message)
+		op.Input = analysisNamedMessage(c, ns, name)
+		ns, name = ds.QName(i.Output.Message)
+		op.Output = analysisNamedMessage(c, ns, name)
+	}
+	return rt
+}
+
+func processNamedBinding(c *Context, ds *wsdl.Definitions, bt *wsdl.Binding, rt *Binding) *Binding {
+	var ns, name string
+	rt.Operations = NewNamedSlice[*Operation]()
+	for _, i := range bt.Operations {
+		op := rt.PortType.Operations.Get(i.Name)
+		if op == nil {
+			panic("unknown operation: " + i.Name)
+		}
+		rt.Operations.Set(op.Name, op)
+
+		op.SoapAction11 = i.SOAP11Operation.Action
+		op.SoapAction12 = i.SOAP12Operation.Action
+		for _, h := range i.Input.Header {
+			ns, name = ds.QName(h.Message)
+			msg := c.namedMessages.Get(ns, name)
+			if msg == nil {
+				panic("unknown message: " + name)
+			}
+			part := msg.Parts.Get(h.Part)
+			if part == nil {
+				panic("unknown part: " + h.Part)
+			}
+			op.InputHeaders = append(op.InputHeaders, part)
+		}
+		op.InputBody = op.Input.Parts.Get(i.Input.Body.Parts)
+
+		for _, h := range i.Output.Header {
+			ns, name = ds.QName(h.Message)
+			msg := c.namedMessages.Get(ns, name)
+			if msg == nil {
+				panic("unknown message: " + name)
+			}
+			part := msg.Parts.Get(h.Part)
+			if part == nil {
+				panic("unknown part: " + h.Part)
+			}
+			op.OutputHeaders = append(op.OutputHeaders, part)
+		}
+		op.OutputBody = op.Output.Parts.Get(i.Output.Body.Parts)
+	}
+	return rt
 }
 
 func analysisNamedMessage(c *Context, ns, name string) *Message {
