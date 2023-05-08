@@ -2,7 +2,7 @@ package wsdlgen
 
 import (
 	"fmt"
-	"github.com/smartletn/wsdl2go/wsdl"
+	"github.com/smartlet/wsdl2go/wsdl"
 	"io"
 	"os"
 	"path/filepath"

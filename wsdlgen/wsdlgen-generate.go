@@ -1,7 +1,7 @@
 package wsdlgen
 
 import (
-	"github.com/smartletn/wsdl2go/builtin"
+	"github.com/smartlet/wsdl2go/builtin"
 )
 
 func generateBuiltinType(c *Context, buf *Buffer) {
@@ -116,7 +116,7 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 			}
 
 			for _, e := range t.Elements {
-				buf.Line("%v %v `xml:\"%s,omitempty\"`", Identifier(e.Name), ElementFieldTypeName(e), c.QName(e.Ns, e.Name))
+				buf.Line("%v %v `xml:\",omitempty\"`", Identifier(e.Name), ElementFieldTypeName(e), c.QName(e.Ns, e.Name))
 			}
 
 			buf.Line("}\n")

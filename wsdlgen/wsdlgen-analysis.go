@@ -1,7 +1,7 @@
 package wsdlgen
 
 import (
-	"github.com/smartletn/wsdl2go/wsdl"
+	"github.com/smartlet/wsdl2go/wsdl"
 	"strconv"
 	"strings"
 )

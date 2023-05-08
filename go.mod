@@ -1,4 +1,4 @@
-module github.com/smartletn/wsdl2go
+module github.com/smartlet/wsdl2go
 
 go 1.18
 
