@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -308,14 +309,17 @@ var (
 	textUnmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
 
-const maxUnmarshalDepth = 10000
+const (
+	maxUnmarshalDepth     = 10000
+	maxUnmarshalDepthWasm = 5000 // go.dev/issue/56498
+)
 
-var errExeceededMaxUnmarshalDepth = errors.New("exceeded max depth")
+var errUnmarshalDepth = errors.New("exceeded max depth")
 
 // Unmarshal a single XML element into val.
 func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) error {
-	if depth >= maxUnmarshalDepth {
-		return errExeceededMaxUnmarshalDepth
+	if depth >= maxUnmarshalDepth || runtime.GOARCH == "wasm" && depth >= maxUnmarshalDepthWasm {
+		return errUnmarshalDepth
 	}
 	// Find start element if we need it.
 	if start == nil {
@@ -434,7 +438,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		// Validate and assign element name.
 		if tinfo.xmlname != nil {
 			finfo := tinfo.xmlname
-			if finfo.name != "" && finfo.name != start.Name.Local {
+			if finfo.name != "" && finfo.local != start.Name.Local {
 				return UnmarshalError("expected element type <" + finfo.name + "> but have <" + start.Name.Local + ">")
 			}
 			if finfo.xmlns != "" && finfo.xmlns != start.Name.Space {
@@ -461,7 +465,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 				switch finfo.flags & fMode {
 				case fAttr:
 					strv := finfo.value(sv, initNilPointers)
-					if a.Name.Local == finfo.name && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
+					if a.Name.Local == finfo.local && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
 						if err := d.unmarshalAttr(strv, a); err != nil {
 							return err
 						}
@@ -533,7 +537,7 @@ Loop:
 			consumed := false
 			if sv.IsValid() {
 				// unmarshalPath can call unmarshal, so we need to pass the depth through so that
-				// we can continue to enforce the maximum recusion limit.
+				// we can continue to enforce the maximum recursion limit.
 				consumed, err = d.unmarshalPath(tinfo, sv, nil, &t, depth)
 				if err != nil {
 					return err
@@ -698,7 +702,7 @@ Loop:
 				continue Loop
 			}
 		}
-		if len(finfo.parents) == len(parents) && finfo.name == start.Name.Local {
+		if len(finfo.parents) == len(parents) && finfo.local == start.Name.Local {
 			// It's a perfect match, unmarshal the field.
 			return true, d.unmarshal(finfo.value(sv, initNilPointers), start, depth+1)
 		}

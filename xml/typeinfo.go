@@ -21,9 +21,18 @@ type typeInfo struct {
 type fieldInfo struct {
 	idx     []int
 	name    string
+	local   string
 	xmlns   string
 	flags   fieldFlags
 	parents []string
+}
+
+func local(name string) string {
+	idx := strings.IndexByte(name, ':')
+	if idx == -1 {
+		return name
+	}
+	return name[idx+1:]
 }
 
 type fieldFlags int
@@ -180,6 +189,7 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 		// process it as usual because its name should default to
 		// empty rather than to the field name.
 		finfo.name = tag
+		finfo.local = local(finfo.name)
 		return finfo, nil
 	}
 
@@ -189,8 +199,10 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 		// or field name otherwise.
 		if xmlname := lookupXMLName(f.Type); xmlname != nil {
 			finfo.xmlns, finfo.name = xmlname.xmlns, xmlname.name
+			finfo.local = local(finfo.name)
 		} else {
 			finfo.name = f.Name
+			finfo.local = local(finfo.name)
 		}
 		return finfo, nil
 	}
@@ -204,6 +216,7 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 		return nil, fmt.Errorf("xml: trailing '>' in field %s of type %s", f.Name, typ)
 	}
 	finfo.name = parents[len(parents)-1]
+	finfo.local = local(finfo.name)
 	if len(parents) > 1 {
 		if (finfo.flags & fElement) == 0 {
 			return nil, fmt.Errorf("xml: %s chain not valid with %s flag", tag, strings.Join(tokens[1:], ","))
@@ -292,7 +305,7 @@ Loop:
 				conflicts = append(conflicts, i)
 			}
 		} else {
-			if newf.name == oldf.name {
+			if newf.name == oldf.name && newf.xmlns == oldf.xmlns {
 				conflicts = append(conflicts, i)
 			}
 		}
