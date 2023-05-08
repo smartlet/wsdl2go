@@ -42,7 +42,7 @@ func generateSimpleType(c *Context, buf *Buffer, ts []*SimpleType) {
 }
 
 func generateInnerSimpleType(c *Context, buf *Buffer) {
-	for _, ts := range c.innerSimpleTypes.All() {
+	for _, ts := range c.innerSimpleTypes.AllByNs() {
 		generateSimpleType(c, buf, ts)
 	}
 }
@@ -130,7 +130,7 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 }
 
 func generateInnerComplexType(c *Context, buf *Buffer) {
-	for _, ts := range c.innerComplexTypes.All() {
+	for _, ts := range c.innerComplexTypes.AllByNs() {
 		generateComplexType(c, buf, ts)
 	}
 }

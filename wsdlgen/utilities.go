@@ -63,22 +63,32 @@ func (s *NamedSlice[V]) All() []V {
 
 type NsOrderSlice[V any] struct {
 	data map[string][]V
+	hash map[string][]V
 }
 
 func NewNsOrderSlice[V any]() *NsOrderSlice[V] {
 	return &NsOrderSlice[V]{
 		data: make(map[string][]V, defaultCapacity),
+		hash: make(map[string][]V, defaultCapacity),
 	}
 }
 
-func (m *NsOrderSlice[V]) Add(ns string, v V) {
+func (m *NsOrderSlice[V]) Add(ns, k string, v V) {
 	set := m.data[ns]
 	set = append(set, v)
 	m.data[ns] = set
+
+	bag := m.hash[k]
+	bag = append(bag, v)
+	m.hash[k] = bag
 }
 
-func (m *NsOrderSlice[V]) All() map[string][]V {
+func (m *NsOrderSlice[V]) AllByNs() map[string][]V {
 	return m.data
+}
+
+func (m *NsOrderSlice[V]) AllByKey() map[string][]V {
+	return m.hash
 }
 
 type NsNamedSlice[V any] struct {

@@ -19,6 +19,7 @@ func WsdlGen(wsdl string, pack string, out io.Writer) {
 
 	decodeDefinitions(ctx)
 	analysisDefinitions(ctx)
+	specialsDefinitions(ctx)
 
 	buf := NewBuffer(2048)
 	// defer buffer clean

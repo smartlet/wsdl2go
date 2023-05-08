@@ -118,7 +118,7 @@ func processSimpleType(c *Context, sc *wsdl.Schema, st *wsdl.SimpleType, rt *Sim
 			rt.Base = analysisNamedType(c, ns, name)
 		} else if st.Restriction.SimpleType != nil {
 			it := &SimpleType{Ns: sc.TargetNamespace, Name: rt.Name + "Base"}
-			c.innerSimpleTypes.Add(it.Ns, it)
+			c.innerSimpleTypes.Add(it.Ns, it.Name, it)
 			rt.Base = processSimpleType(c, sc, st.Restriction.SimpleType, it)
 		} else {
 			panic("invalid restriction")
@@ -130,7 +130,7 @@ func processSimpleType(c *Context, sc *wsdl.Schema, st *wsdl.SimpleType, rt *Sim
 			rt.List = analysisNamedType(c, ns, name)
 		} else if st.List.SimpleType != nil {
 			it := &SimpleType{Ns: sc.TargetNamespace, Name: rt.Name + "Item"}
-			c.innerSimpleTypes.Add(it.Ns, it)
+			c.innerSimpleTypes.Add(it.Ns, it.Name, it)
 			rt.List = processSimpleType(c, sc, st.List.SimpleType, it)
 		} else {
 			panic("invalid restriction")
@@ -145,7 +145,7 @@ func processSimpleType(c *Context, sc *wsdl.Schema, st *wsdl.SimpleType, rt *Sim
 		if len(st.Union.SimpleTypes) > 0 {
 			for i, t := range st.Union.SimpleTypes {
 				it := &SimpleType{Ns: sc.TargetNamespace, Name: rt.Name + "Union" + strconv.Itoa(i)}
-				c.innerSimpleTypes.Add(it.Ns, it)
+				c.innerSimpleTypes.Add(it.Ns, it.Name, it)
 				rt.Union = append(rt.Union, processSimpleType(c, sc, t, it))
 			}
 		}
@@ -200,7 +200,7 @@ func processContent(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, re *wsdl.
 			rt.Base = analysisNamedType(c, ns, name)
 		} else if re.SimpleType != nil {
 			st := &SimpleType{Ns: sc.TargetNamespace, Name: ct.Name + "Type"}
-			c.innerSimpleTypes.Add(st.Ns, st)
+			c.innerSimpleTypes.Add(st.Ns, st.Name, st)
 			rt.Base = processSimpleType(c, sc, re.SimpleType, st)
 		} else {
 			panic("invalid type...")
@@ -318,11 +318,11 @@ func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, m
 		rt.Type = analysisNamedType(c, ns, name)
 	} else if e.SimpleType != nil {
 		it := &SimpleType{Ns: sc.TargetNamespace, Name: e.Name + "Type"}
-		c.innerSimpleTypes.Add(it.Ns, it)
+		c.innerSimpleTypes.Add(it.Ns, it.Name, it)
 		rt.Type = processSimpleType(c, sc, e.SimpleType, it)
 	} else if e.ComplexType != nil {
 		it := &ComplexType{Ns: sc.TargetNamespace, Name: e.Name + "Type"}
-		c.innerComplexTypes.Add(it.Ns, it)
+		c.innerComplexTypes.Add(it.Ns, it.Name, it)
 		rt.Type = processComplexType(c, sc, e.ComplexType, it)
 	} else {
 		panic("invalid type: " + rt.Name)
@@ -396,7 +396,7 @@ func processAttribute(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, a *wsdl
 		at.Type = analysisNamedType(c, ns, name)
 	} else if a.SimpleType != nil {
 		st := &SimpleType{Ns: sc.TargetNamespace, Name: a.Name + "Type"}
-		c.innerSimpleTypes.Add(st.Ns, st)
+		c.innerSimpleTypes.Add(st.Ns, st.Name, st)
 		at.Type = processSimpleType(c, sc, a.SimpleType, st)
 	} else {
 		panic("invalid type: " + a.Name)
