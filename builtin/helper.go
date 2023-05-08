@@ -1,7 +1,6 @@
 package builtin
 
 import (
-	"bytes"
 	_ "embed"
 	"strings"
 )
@@ -58,12 +57,12 @@ func Type(name string) string {
 }
 
 //go:embed builtin.go
-var data []byte
+var data string
 
-func Export(pack string) []byte {
+func Export(pack string) string {
 	if pack != "" {
-		return bytes.TrimSpace(bytes.Replace(data, []byte("package builtin"), []byte("package "+pack), 1))
+		return strings.TrimSpace(strings.Replace(data, "package builtin", "package "+pack, 1))
 	} else {
-		return bytes.TrimSpace(bytes.Replace(data, []byte("package builtin"), []byte(""), 1))
+		return strings.TrimSpace(strings.Replace(data, "package builtin", "", 1))
 	}
 }

@@ -6,18 +6,30 @@ import (
 )
 
 const (
-	servicesWsdlFile = "../test/services.wsdl"
-	servicesGoFile   = `E:\temp\generate.go`
+	wsdl     = "../test/services.wsdl"
+	request  = `E:\temp\request.go`
+	response = `E:\temp\response.go`
 )
 
 func TestGenerate(t *testing.T) {
 
-	out, err := os.Create(servicesGoFile)
+	req, err := os.Create(request)
 	if err != nil {
 		panic(err)
 	}
-	defer out.Close()
+	defer req.Close()
 
-	WsdlGen(servicesWsdlFile, "ews", out)
+	rsp, err := os.Create(response)
+	if err != nil {
+		panic(err)
+	}
+	defer rsp.Close()
+
+	WsdlGen(wsdl, Output{
+		ResponsePackage: "response",
+		ResponseSources: rsp,
+		RequestPackage:  "request",
+		RequestSources:  rsp,
+	})
 
 }

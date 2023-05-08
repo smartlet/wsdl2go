@@ -3,7 +3,6 @@ package wsdlgen
 import (
 	"github.com/smartlet/wsdl2go/wsdl"
 	"strconv"
-	"strings"
 )
 
 func analysisDefinitions(c *Context) {
@@ -50,15 +49,7 @@ func analysisNamedElement(c *Context, ns, name string) *Element {
 	sc := c.schemas.Get(ns)
 	for _, e := range sc.Elements {
 		if e.Name == name {
-			rt := c.namedElements.Get(ns, name)
-			if rt != nil {
-				return rt
-			}
-			rt = &Element{Ns: ns, Name: name}
-			if c.namedElements.Set(ns, name, rt) {
-				panic("duplicate element: " + name)
-			}
-			return processElement(c, sc, e, rt, "")
+			return processElement(c, sc, e, &Element{Ns: ns, Name: name}, "")
 		}
 	}
 
@@ -364,10 +355,9 @@ func processAttribute(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, a *wsdl
 
 	// 特殊属性
 	if a.Ref == "xml:lang" || a.Ref == "xsi:nil" {
-		idx := strings.IndexByte(a.Ref, ':')
 		rt.Attributes = append(rt.Attributes, &Attribute{
-			Ns:   a.Ref[:idx],
-			Name: a.Ref[idx+1:],
+			Ns:   "",
+			Name: a.Ref,
 			Type: BuiltinType("XsString"),
 		})
 		return

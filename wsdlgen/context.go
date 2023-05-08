@@ -17,7 +17,6 @@ func NewContext(path string) *Context {
 		innerSimpleTypes:  NewNsOrderSlice[*SimpleType](),
 		namedComplexTypes: NewNsNamedSlice[*ComplexType](),
 		innerComplexTypes: NewNsOrderSlice[*ComplexType](),
-		namedElements:     NewNsNamedSlice[*Element](),
 		namedMessages:     NewNsNamedSlice[*Message](),
 		prefixes:          make(map[string]string),
 	}
@@ -38,19 +37,29 @@ type Context struct {
 	innerSimpleTypes  *NsOrderSlice[*SimpleType]  // 在element/attribute/base内声明的无name的simpleType
 	namedComplexTypes *NsNamedSlice[*ComplexType] // 顶层带有name可以被ref的complexType
 	innerComplexTypes *NsOrderSlice[*ComplexType] // 在element/attribute/base内声明的无name的complexType
-	namedElements     *NsNamedSlice[*Element]     // 顶层带有name可以被ref的element
 	namedMessages     *NsNamedSlice[*Message]     // 顶层带有name可以被ref的message
 	definitions       *wsdl.Definitions
 	prefixes          map[string]string
 	traceWriter       io.WriteCloser
 }
 
+func (c *Context) Prefixes(m map[string]string) {
+	c.prefixes = m
+}
+
+// QName 如果设置了prefixes则采用p:name形式, 否则使用"namespace-URL name"形式
 func (c *Context) QName(ns, name string) string {
-	pre := c.prefixes[ns]
-	if pre != "" {
-		return pre + ":" + name
+
+	if ns == "" {
+		return name
 	}
-	return name
+
+	p := c.prefixes[ns]
+	if p != "" {
+		return p + ":" + name
+	}
+	return ns + " " + name
+
 }
 
 func (c *Context) trace(format string, args ...any) {

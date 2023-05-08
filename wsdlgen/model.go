@@ -134,6 +134,4 @@ var defaultPrefix = map[string]string{
 	"http://schemas.microsoft.com/exchange/services/2006/messages": "m",
 	"http://schemas.microsoft.com/exchange/services/2006/types":    "t",
 	"http://www.w3.org/2001/XMLSchema":                             "x",
-	"xml":                                                          "xml",
-	"xsi":                                                          "xsi",
 }

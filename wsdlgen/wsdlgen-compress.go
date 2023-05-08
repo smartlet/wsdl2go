@@ -3,7 +3,7 @@ package wsdlgen
 import "strings"
 
 // 特殊处理场景. 匿名相同则加上ns后缀方便区别
-func specialsDefinitions(c *Context) {
+func compressDefinitions(c *Context) {
 	for _, ks := range c.innerSimpleTypes.AllByKey() {
 		if ln := len(ks); ln > 1 {
 			// 去重
