@@ -5,6 +5,7 @@ import (
 	"github.com/smartlet/wsdl2go/builtin"
 	"go/format"
 	"io"
+	"strings"
 )
 
 func generateDefinitions(c *Context, pack string, out io.Writer, buf *Buffer) {
@@ -110,7 +111,7 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 			}
 		}
 		for _, a := range t.Attributes {
-			buf.Line("%s %s `xml:\"%s,attr\"`", Identifier(a.Name), TypeName(a.Type), a.Name) // attribute默认不带前缀
+			buf.Line("%s %s `xml:\"%s,attr,omitempty\"`", Identifier(a.Name), TypeName(a.Type), a.Name) // attribute默认不带前缀
 		}
 		for _, e := range t.Elements {
 			var gtype string
@@ -175,7 +176,18 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 			buf.Line("func (b *%s) %s (ctx context.Context, input *%s, detail any)(*%s, error) {", implementType, operation, inputType, outputType)
 			hasInputHeader := len(op.InputHeader) > 0
 			if hasInputHeader {
-				buf.Line("inputHeader := &struct {") // 声明为指针减少传递复制
+				buf.Line("var inputHeader any")
+
+				for i, e := range op.InputHeader {
+					if i == 0 {
+						fmt.Fprint(buf, "if ")
+					} else {
+						fmt.Fprint(buf, " || ")
+					}
+					fmt.Fprintf(buf, "input.%s != %s", Identifier(e.Name), ZeroValue(e.Type))
+				}
+				buf.Line(" {")
+				buf.Line("inputHeader = &struct {") // 声明为指针减少传递复制
 				for _, e := range op.InputHeader {
 					generateElementField(c, e, buf)
 				}
@@ -183,6 +195,7 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 				for _, e := range op.InputHeader {
 					buf.Line("%s: input.%s,", Identifier(e.Name), Identifier(e.Name))
 				}
+				buf.Line("}")
 				buf.Line("}")
 			}
 			buf.Line("inputBody := &struct {")
@@ -227,6 +240,45 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 		buf.Line("return &%s{client: client}", implementType)
 		buf.Line("}\n")
 	}
+}
+
+func ZeroValue(t Type) string {
+	switch t := t.(type) {
+	case nil:
+		return "nil"
+	case BuiltinType:
+		v := strings.ToUpper(string(t))
+		if strings.Index(v, "byte") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "short") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "int") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "long") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "float") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "double") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "decimal") != -1 {
+			return "0"
+		}
+		if strings.Index(v, "binary") != -1 {
+			return "nil"
+		}
+		return `""`
+	case *SimpleType:
+		if t.Base != nil {
+			return ZeroValue(t.Base)
+		}
+	}
+	return "nil"
 }
 
 func generateElementField(c *Context, e *Element, buf *Buffer) {

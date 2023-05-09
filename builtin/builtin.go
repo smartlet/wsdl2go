@@ -144,8 +144,8 @@ type SOAPClient interface {
 
 const (
 	XmlnsS = "http://schemas.xmlsoap.org/soap/envelope/"
-	XmlnsT = "https://schemas.microsoft.com/exchange/services/2006/types"
-	XmlnsM = "https://schemas.microsoft.com/exchange/services/2006/messages"
+	XmlnsT = "http://schemas.microsoft.com/exchange/services/2006/types"
+	XmlnsM = "http://schemas.microsoft.com/exchange/services/2006/messages"
 )
 
 var XmlnsPrefix = map[string]string{
