@@ -1,5 +1,10 @@
 package builtin
 
+import (
+	"context"
+	"encoding/xml"
+)
+
 // XsDuration https://www.w3.org/TR/xmlschema-2/#duration
 type XsDuration string
 
@@ -132,5 +137,35 @@ type XsUnsignedByte uint8
 // XsPositiveInteger https://www.w3.org/TR/xmlschema-2/#positiveInteger
 type XsPositiveInteger int64
 
-// SOAPClient
-type SOAP
+// SOAPClient soap client interface
+type SOAPClient interface {
+	Call(ctx context.Context, soapAction string, inputHeader, inputBody, outputHeader, outputBody any) error
+}
+
+const (
+	XmlnsS = "http://schemas.xmlsoap.org/soap/envelope/"
+	XmlnsT = "https://schemas.microsoft.com/exchange/services/2006/types"
+	XmlnsM = "https://schemas.microsoft.com/exchange/services/2006/messages"
+)
+
+var XmlnsPrefix = map[string]string{
+	XmlnsS: "s",
+	XmlnsM: "m",
+	XmlnsT: "t",
+}
+
+type Envelope struct {
+	XMLName xml.Name `xml:"s:Envelope"`
+	XmlnsS  string   `xml:"xmlns:s,attr"`
+	XmlnsM  string   `xml:"xmlns:m,attr"`
+	XmlnsT  string   `xml:"xmlns:t,attr"`
+	Header  any      `xml:"s:Header,omitempty"` // 必须没有XMLName. 在binding使用匿名struct实现!
+	Body    any      `xml:"s:Body,omitempty"`   // 必须没有XMLName. 在binding使用匿名struct实现!
+}
+
+type Fault struct {
+	FaultCode   string `xml:"faultcode,omitempty"`
+	FaultString string `xml:"faultstring,omitempty"`
+	FaultActor  string `xml:"faultactor,omitempty"`
+	Detail      any    `xml:"detail,omitempty"`
+}

@@ -10,10 +10,6 @@ import (
 func generateDefinitions(c *Context, pack string, out io.Writer, buf *Buffer) {
 
 	buf.Line("package %s", pack)
-	buf.Line("import (")
-	buf.Line(`"context"`)
-	buf.Line(`"encoding/xml"`)
-	buf.Line(")\n")
 
 	generateBuiltinType(c, buf)
 	fmt.Fprintln(buf)
@@ -31,7 +27,7 @@ func generateDefinitions(c *Context, pack string, out io.Writer, buf *Buffer) {
 	fmt.Fprintln(buf)
 	generateBindingImplement(c, buf)
 	fmt.Fprintln(buf)
-	generateEnvelopeTypes(c, buf)
+
 	data, err := format.Source(buf.Bytes())
 	if err != nil {
 		out.Write(buf.Bytes())
@@ -104,17 +100,17 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 			switch bt := t.Base.(type) {
 			case nil:
 			case BuiltinType:
-				buf.Line("CharData %s `xml:\",chardata,omitempty\"`", PointerTypeName(bt))
+				buf.Line("CharData %s `xml:\",chardata\"`", PointerTypeName(bt))
 			case *SimpleType:
-				buf.Line("CharData %s `xml:\",chardata,omitempty\"`", PointerTypeName(bt))
+				buf.Line("CharData %s `xml:\",chardata\"`", PointerTypeName(bt))
 			case *ComplexType:
-				buf.Line("%s `xml:\",omitempty\"`", TypeName(bt.Name)) // 不需要指针"*"形式!
+				buf.Line("%s `xml:\",omitempty\"`", TypeName(bt)) // 不需要指针"*"形式!
 			default:
 				panic("invalid base type")
 			}
 		}
 		for _, a := range t.Attributes {
-			buf.Line("%s %s `xml:\"%s,attr,omitempty\"`", Identifier(a.Name), TypeName(a.Type), a.Name) // attribute默认不带前缀
+			buf.Line("%s %s `xml:\"%s,attr\"`", Identifier(a.Name), TypeName(a.Type), a.Name) // attribute默认不带前缀
 		}
 		for _, e := range t.Elements {
 			var gtype string
@@ -145,12 +141,7 @@ func generateNamedMessage(c *Context, buf *Buffer) {
 		for _, m := range ms.All() {
 			buf.Line("type %s struct {", Identifier(m.Name))
 			for _, e := range m.Parts.All() {
-				var gtype string
-				if e.MaxOccurs != "" && e.MaxOccurs != "0" && e.MaxOccurs != "1" {
-					gtype += "[]"
-				}
-				gtype += PointerTypeName(e.Type)
-				buf.Line("%s %s `xml:\"%s,omitempty\"`", Identifier(e.Name), gtype, c.QName(e.Ns, e.Name))
+				generateElementField(c, e, buf)
 			}
 			buf.Line("}\n")
 		}
@@ -172,15 +163,77 @@ func generatePortTypeInterface(c *Context, buf *Buffer) {
 
 func generateBindingImplement(c *Context, buf *Buffer) {
 	for _, bd := range c.namedBindings.All() {
-		buf.Line("type %s struct {", Identifier(bd.Name))
-		buf.Line("client ")
+		interfaceType := Identifier(bd.PortType.Name)
+		implementType := Identifier(bd.Name)
+		buf.Line("type %s struct {", implementType)
+		buf.Line("client SOAPClient")
 		buf.Line("}\n")
 		for _, op := range bd.Operations.All() {
+			operation := Identifier(op.Name)
+			inputType := Identifier(op.Input.Name)
+			outputType := Identifier(op.Output.Name)
+			buf.Line("func (b *%s) %s (ctx context.Context, input *%s, detail any)(*%s, error) {", implementType, operation, inputType, outputType)
+			hasInputHeader := len(op.InputHeader) > 0
+			if hasInputHeader {
+				buf.Line("inputHeader := &struct {") // 声明为指针减少传递复制
+				for _, e := range op.InputHeader {
+					generateElementField(c, e, buf)
+				}
+				buf.Line("}{")
+				for _, e := range op.InputHeader {
+					buf.Line("%s: input.%s,", Identifier(e.Name), Identifier(e.Name))
+				}
+				buf.Line("}")
+			}
+			buf.Line("inputBody := &struct {")
+			generateElementField(c, op.InputBody, buf)
+			buf.Line("}{")
+			buf.Line("%s: input.%s,", Identifier(op.InputBody.Name), Identifier(op.InputBody.Name))
+			buf.Line("}")
 
+			hashOutputHeader := len(op.OutputHeader) > 0
+			if hashOutputHeader {
+				buf.Line("outputHeader := &struct {") // 声明为指针减少传递复制
+				for _, e := range op.OutputHeader {
+					generateElementField(c, e, buf)
+				}
+				buf.Line("}{}")
+			}
+			buf.Line("outputBody := &struct {")
+			generateElementField(c, op.OutputBody, buf)
+			buf.Line("Fault *Fault `xml:\"s:Fault,omitempty\"`")
+			buf.Line("}{")
+			buf.Line("Fault: &Fault {Detail: detail},")
+			buf.Line("}")
+			buf.Line("err := b.client.Call(ctx, %q, %s, inputBody, %s, outputBody)",
+				nvl(op.SoapAction11, op.SoapAction12),
+				If(hasInputHeader, "inputHeader", "nil"),
+				If(hashOutputHeader, "outputHeader", "nil"),
+			)
+			buf.Line("if err != nil {")
+			buf.Line("return nil, err")
+			buf.Line("}")
+
+			buf.Line("output := &%s{", Identifier(op.Output.Name))
+			for _, e := range op.OutputHeader {
+				buf.Line("%s: outputHeader.%s,", Identifier(e.Name), Identifier(e.Name))
+			}
+			buf.Line("%s: outputBody.%s,", Identifier(op.OutputBody.Name), Identifier(op.OutputBody.Name))
+			buf.Line("}")
+			buf.Line("return output, nil")
+			buf.Line("}\n")
 		}
+		buf.Line("func New%s(client SOAPClient) *%s {", interfaceType, implementType)
+		buf.Line("return &%s{client: client}", implementType)
+		buf.Line("}\n")
 	}
 }
 
-func generateEnvelopeTypes(c *Context, buf *Buffer) {
-
+func generateElementField(c *Context, e *Element, buf *Buffer) {
+	var gtype string
+	if e.MaxOccurs != "" && e.MaxOccurs != "0" && e.MaxOccurs != "1" {
+		gtype += "[]"
+	}
+	gtype += PointerTypeName(e.Type)
+	buf.Line("%s %s `xml:\"%s,omitempty\"`", Identifier(e.Name), gtype, c.QName(e.Ns, e.Name))
 }

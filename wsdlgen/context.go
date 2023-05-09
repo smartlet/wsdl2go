@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-func NewContext(path string) *Context {
-	ctx := &Context{
+func NewContext(path string, prefixes map[string]string) *Context {
+	return &Context{
 		wsdl:              path,
 		base:              filepath.Dir(path),
 		schemas:           NewNamedSlice[*wsdl.Schema](),
@@ -20,15 +20,8 @@ func NewContext(path string) *Context {
 		namedMessages:     NewNsNamedSlice[*Message](),
 		namedPortTypes:    NewNamedSlice[*PortType](),
 		namedBindings:     NewNamedSlice[*Binding](),
-		prefixes:          make(map[string]string),
+		prefixes:          prefixes,
 	}
-
-	// 添加输出时的默认的前缀
-	for k, v := range defaultPrefix {
-		ctx.prefixes[k] = v
-	}
-
-	return ctx
 }
 
 type Context struct {

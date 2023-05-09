@@ -166,3 +166,10 @@ func nvl(ss ...string) string {
 	}
 	return ""
 }
+
+func If[V any](c bool, v1 V, v2 V) V {
+	if c {
+		return v1
+	}
+	return v2
+}

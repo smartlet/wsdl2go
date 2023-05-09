@@ -1,35 +1,24 @@
 package wsdlgen
 
 import (
+	"github.com/smartlet/wsdl2go/soap"
 	"os"
 	"testing"
 )
 
 const (
-	wsdl     = "../test/services.wsdl"
-	request  = `E:\temp\request.go`
-	response = `E:\temp\response.go`
+	wsdlFile   = "../test/services.wsdl"
+	outputFile = `E:\temp\services.wsdl.go`
 )
 
 func TestGenerate(t *testing.T) {
 
-	req, err := os.Create(request)
+	out, err := os.Create(outputFile)
 	if err != nil {
 		panic(err)
 	}
-	defer req.Close()
+	defer out.Close()
 
-	rsp, err := os.Create(response)
-	if err != nil {
-		panic(err)
-	}
-	defer rsp.Close()
-
-	WsdlGen(wsdl, Output{
-		ResponsePackage: "response",
-		ResponseSources: rsp,
-		RequestPackage:  "request",
-		RequestSources:  rsp,
-	})
+	WsdlGen(wsdlFile, soap.DefaultPrefix, "ews", out)
 
 }

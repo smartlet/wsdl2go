@@ -71,7 +71,7 @@ func processNamedBinding(c *Context, ds *wsdl.Definitions, bt *wsdl.Binding, rt 
 			if part == nil {
 				panic("unknown part: " + h.Part)
 			}
-			op.InputHeaders = append(op.InputHeaders, part)
+			op.InputHeader = append(op.InputHeader, part)
 		}
 		op.InputBody = op.Input.Parts.Get(i.Input.Body.Parts)
 
@@ -85,7 +85,7 @@ func processNamedBinding(c *Context, ds *wsdl.Definitions, bt *wsdl.Binding, rt 
 			if part == nil {
 				panic("unknown part: " + h.Part)
 			}
-			op.OutputHeaders = append(op.OutputHeaders, part)
+			op.OutputHeader = append(op.OutputHeader, part)
 		}
 		op.OutputBody = op.Output.Parts.Get(i.Output.Body.Parts)
 	}

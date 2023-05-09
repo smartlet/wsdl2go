@@ -5,21 +5,14 @@ import (
 	"path/filepath"
 )
 
-type Output struct {
-	RequestPackage  string
-	RequestSources  io.Writer
-	ResponsePackage string
-	ResponseSources io.Writer
-}
-
-func WsdlGen(wsdl string, output Output) {
+func WsdlGen(wsdl string, prefixes map[string]string, pack string, out io.Writer) {
 
 	abs, err := filepath.Abs(wsdl)
 	if err != nil {
 		panic(err)
 	}
 
-	ctx := NewContext(abs)
+	ctx := NewContext(abs, prefixes)
 	defer ctx.close()
 
 	decodeDefinitions(ctx)
@@ -28,11 +21,7 @@ func WsdlGen(wsdl string, output Output) {
 
 	buf := NewBuffer(2048)
 
-	buf.Reset()
-	generateDefinitions(ctx, output.ResponsePackage, output.ResponseSources, buf)
-
-	ctx.Prefixes(defaultPrefix)
-	buf.Reset()
-	generateDefinitions(ctx, output.RequestPackage, output.RequestSources, buf)
+	ctx.Prefixes(prefixes)
+	generateDefinitions(ctx, pack, out, buf)
 
 }

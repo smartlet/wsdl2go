@@ -85,16 +85,16 @@ type Binding struct {
 }
 
 type Operation struct {
-	Ns            string
-	Name          string
-	Input         *Message
-	Output        *Message
-	SoapAction11  string
-	SoapAction12  string
-	InputHeaders  []*Element
-	OutputHeaders []*Element
-	InputBody     *Element
-	OutputBody    *Element
+	Ns           string
+	Name         string
+	Input        *Message
+	Output       *Message
+	SoapAction11 string
+	SoapAction12 string
+	InputHeader  []*Element
+	OutputHeader []*Element
+	InputBody    *Element
+	OutputBody   *Element
 }
 
 type PortType struct {
@@ -140,12 +140,4 @@ func PointerTypeName(t Type) string {
 		return "*" + Identifier(t.Name)
 	}
 	panic("invalid type")
-}
-
-var defaultPrefix = map[string]string{
-	"http://schemas.xmlsoap.org/wsdl/":                             "w",
-	"http://schemas.xmlsoap.org/wsdl/soap/":                        "s",
-	"http://schemas.microsoft.com/exchange/services/2006/messages": "m",
-	"http://schemas.microsoft.com/exchange/services/2006/types":    "t",
-	"http://www.w3.org/2001/XMLSchema":                             "x",
 }
