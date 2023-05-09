@@ -2396,7 +2396,6 @@
                 <soap:header message="tns:GetUserAvailabilitySoapIn" part="TimeZoneContext" use="literal"/>
                 <soap:header message="tns:GetUserAvailabilitySoapIn" part="RequestVersion" use="literal"/>
                 <soap:body parts="GetUserAvailabilityRequest" use="literal" />
-                <soap:header message="tns:GetUserAvailabilitySoapIn" part="RequestVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="GetUserAvailabilityResult" use="literal" />

@@ -19,6 +19,6 @@ func TestGenerate(t *testing.T) {
 	}
 	defer out.Close()
 
-	WsdlGen(wsdlFile, soap.DefaultPrefix, "ews", out)
+	WsdlGen(wsdlFile, soap.DefaultPrefix, "wsdl", out)
 
 }
