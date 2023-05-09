@@ -169,3 +169,7 @@ type Fault struct {
 	FaultActor  string `xml:"faultactor,omitempty"`
 	Detail      any    `xml:"detail,omitempty"`
 }
+
+func (f Fault) Error() string {
+	return f.FaultCode + ":" + f.FaultString
+}
