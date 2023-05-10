@@ -227,6 +227,10 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 			buf.Line("return nil, err")
 			buf.Line("}")
 
+			buf.Line("if outputBody.Fault != nil && outputBody.Fault.FaultCode != \"\" {")
+			buf.Line("return nil, outputBody.Fault")
+			buf.Line("}")
+
 			buf.Line("output := &%s{", Identifier(op.Output.Name))
 			for _, e := range op.OutputHeader {
 				buf.Line("%s: outputHeader.%s,", Identifier(e.Name), Identifier(e.Name))

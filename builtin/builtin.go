@@ -167,9 +167,21 @@ type Fault struct {
 	FaultCode   string `xml:"faultcode,omitempty"`
 	FaultString string `xml:"faultstring,omitempty"`
 	FaultActor  string `xml:"faultactor,omitempty"`
-	Detail      any    `xml:"detail,omitempty"`
+	Detail      error  `xml:"detail,omitempty"`
 }
 
 func (f Fault) Error() string {
+	if f.Detail != nil {
+		return f.Detail.Error()
+	}
 	return f.FaultCode + ":" + f.FaultString
+}
+
+type SimpleFaultDetail struct {
+	ResponseCode string `xml:"ResponseCode,omitempty"`
+	Message      string `xml:"Message,omitempty"`
+}
+
+func (d SimpleFaultDetail) Error() string {
+	return d.ResponseCode + ":" + d.Message
 }
