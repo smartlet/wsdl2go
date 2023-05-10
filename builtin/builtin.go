@@ -177,12 +177,3 @@ func (f Fault) Error() string {
 	}
 	return f.FaultCode + ":" + f.FaultString
 }
-
-type SimpleFaultDetail struct {
-	ResponseCode string `xml:"ResponseCode,omitempty"`
-	Message      string `xml:"Message,omitempty"`
-}
-
-func (d SimpleFaultDetail) Error() string {
-	return d.ResponseCode + ":" + d.Message
-}
