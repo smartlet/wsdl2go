@@ -1,7 +1,6 @@
 package wsdlgen
 
 import (
-	"github.com/smartlet/wsdl2go/soap"
 	"os"
 	"testing"
 )
@@ -11,6 +10,12 @@ const (
 	outputFile = `E:\temp\services.wsdl.go`
 )
 
+var DefaultPrefix = map[string]string{
+	"http://schemas.xmlsoap.org/soap/envelope/":                    "s",
+	"http://schemas.microsoft.com/exchange/services/2006/messages": "m",
+	"http://schemas.microsoft.com/exchange/services/2006/types":    "t",
+}
+
 func TestGenerate(t *testing.T) {
 
 	out, err := os.Create(outputFile)
@@ -19,6 +24,6 @@ func TestGenerate(t *testing.T) {
 	}
 	defer out.Close()
 
-	WsdlGen(wsdlFile, soap.DefaultPrefix, "wsdl", out)
+	WsdlGen(wsdlFile, DefaultPrefix, "wsdl", out)
 
 }
