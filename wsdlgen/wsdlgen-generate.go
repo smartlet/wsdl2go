@@ -158,7 +158,7 @@ func generatePortTypeInterface(c *Context, buf *Buffer) {
 		buf.Line("type %s interface {", Identifier(pt.Name))
 		for _, op := range pt.Operations.All() {
 			// 注意: Message不能使用TypeName()
-			buf.Line("%s(ctx context.Context, in *%s) (*%s, error)", Identifier(op.Name), Identifier(op.Input.Name), Identifier(op.Output.Name))
+			buf.Line("%s(ctx context.Context, in *%s, detail error) (*%s, error)", Identifier(op.Name), Identifier(op.Input.Name), Identifier(op.Output.Name))
 		}
 		buf.Line("}\n")
 	}
@@ -176,7 +176,7 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 			operation := Identifier(op.Name)
 			inputType := Identifier(op.Input.Name)
 			outputType := Identifier(op.Output.Name)
-			buf.Line("func (b *%s) %s (ctx context.Context, input *%s, detail any)(*%s, error) {", implementType, operation, inputType, outputType)
+			buf.Line("func (b *%s) %s (ctx context.Context, input *%s, detail error)(*%s, error) {", implementType, operation, inputType, outputType)
 			hasInputHeader := len(op.InputHeader) > 0
 			if hasInputHeader {
 				buf.Line("var inputHeader any")
