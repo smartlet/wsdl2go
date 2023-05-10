@@ -243,7 +243,7 @@ func generateBindingImplement(c *Context, buf *Buffer) {
 			buf.Line("return output, nil")
 			buf.Line("}\n")
 		}
-		buf.Line("func New%s(client SOAPClient) *%s {", interfaceType, implementType)
+		buf.Line("func New%s(client SOAPClient) %s {", interfaceType, interfaceType)
 		buf.Line("return &%s{client: client}", implementType)
 		buf.Line("}\n")
 	}
