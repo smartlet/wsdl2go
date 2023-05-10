@@ -140,6 +140,7 @@ type XsPositiveInteger int64
 // SOAPClient soap client interface
 type SOAPClient interface {
 	Call(ctx context.Context, soapAction string, inputHeader, inputBody, outputHeader, outputBody any) error
+	Stream(ctx context.Context, soapAction string, inputHeader, inputBOdy any, next func() (any, any, func() error))
 }
 
 const (
