@@ -8,7 +8,7 @@ import (
 
 const (
 	wsdlFile   = "../test/services.wsdl"
-	outputFile = `E:\temp\services.wsdl.go`
+	outputFile = `E:\tmp\services.wsdl.go`
 )
 
 func TestGenerate(t *testing.T) {
@@ -19,6 +19,6 @@ func TestGenerate(t *testing.T) {
 	}
 	defer out.Close()
 
-	WsdlGen(wsdlFile, builtin.XmlnsPrefix, "wsdl", out)
+	WsdlGen(wsdlFile, builtin.XmlnsPrefix, "ews", out)
 
 }
