@@ -44,6 +44,50 @@ func compressDefinitions(c *Context) {
 			}
 		}
 	}
+
+	for _, cs := range c.namedComplexTypes.All() {
+		for _, c := range cs.All() {
+			if c.deprecated {
+				continue
+			}
+			fc := new(ComplexType)
+			flatComplexType(c, fc)
+			c.Base = fc.Base
+			c.Attributes = fc.Attributes
+			c.Elements = fc.Elements
+		}
+	}
+
+	// 打平所有ComplexType
+	for _, cs := range c.innerComplexTypes.AllByNs() {
+		for _, c := range cs {
+			if c.deprecated {
+				continue
+			}
+			fc := new(ComplexType)
+			flatComplexType(c, fc)
+			c.Base = fc.Base
+			c.Attributes = fc.Attributes
+			c.Elements = fc.Elements
+		}
+	}
+
+}
+
+func flatComplexType(ct *ComplexType, rt *ComplexType) {
+
+	if bt, ok := ct.Base.(*ComplexType); ok {
+		flatComplexType(bt, rt)
+	} else {
+		rt.Base = ct.Base
+		for _, a := range ct.Attributes {
+			rt.Attributes = append(rt.Attributes, a)
+		}
+		for _, e := range ct.Elements {
+			rt.Elements = append(rt.Elements, e)
+		}
+	}
+
 }
 
 func equalsType(t Type, v Type) bool {
