@@ -1,6 +1,8 @@
 package wsdlgen
 
-import "strings"
+import (
+	"strings"
+)
 
 // 特殊处理场景. 匿名相同则加上ns后缀方便区别
 func compressDefinitions(c *Context) {
@@ -45,33 +47,38 @@ func compressDefinitions(c *Context) {
 		}
 	}
 
+	flatNamedComlexTypes := NewNsNamedSlice[*ComplexType]()
 	for _, cs := range c.namedComplexTypes.All() {
-		for _, c := range cs.All() {
-			if c.deprecated {
+		for _, ct := range cs.All() {
+			if ct.deprecated {
 				continue
 			}
-			fc := new(ComplexType)
-			flatComplexType(c, fc)
-			c.Base = fc.Base
-			c.Attributes = fc.Attributes
-			c.Elements = fc.Elements
+			fc := &ComplexType{
+				Ns:   ct.Ns,
+				Name: ct.Name,
+			}
+			flatComplexType(ct, fc)
+			flatNamedComlexTypes.Set(fc.Ns, fc.Name, fc)
 		}
 	}
+	c.namedComplexTypes = flatNamedComlexTypes
 
 	// 打平所有ComplexType
+	flatInnerComlexTypes := NewNsOrderSlice[*ComplexType]()
 	for _, cs := range c.innerComplexTypes.AllByNs() {
-		for _, c := range cs {
-			if c.deprecated {
+		for _, ct := range cs {
+			if ct.deprecated {
 				continue
 			}
-			fc := new(ComplexType)
-			flatComplexType(c, fc)
-			c.Base = fc.Base
-			c.Attributes = fc.Attributes
-			c.Elements = fc.Elements
+			fc := &ComplexType{
+				Ns:   ct.Ns,
+				Name: ct.Name,
+			}
+			flatComplexType(ct, fc)
+			flatInnerComlexTypes.Add(fc.Ns, fc.Name, fc)
 		}
 	}
-
+	c.innerComplexTypes = flatInnerComlexTypes
 }
 
 func flatComplexType(ct *ComplexType, rt *ComplexType) {
@@ -80,12 +87,12 @@ func flatComplexType(ct *ComplexType, rt *ComplexType) {
 		flatComplexType(bt, rt)
 	} else {
 		rt.Base = ct.Base
-		for _, a := range ct.Attributes {
-			rt.Attributes = append(rt.Attributes, a)
-		}
-		for _, e := range ct.Elements {
-			rt.Elements = append(rt.Elements, e)
-		}
+	}
+	for _, a := range ct.Attributes {
+		rt.Attributes = append(rt.Attributes, a)
+	}
+	for _, e := range ct.Elements {
+		rt.Elements = append(rt.Elements, e)
 	}
 
 }
