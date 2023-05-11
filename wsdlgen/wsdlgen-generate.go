@@ -289,6 +289,10 @@ func ZeroValue(t Type) string {
 		if t.Base != nil {
 			return ZeroValue(t.Base)
 		}
+	case *ComplexType:
+		if degraded(t) {
+			return ZeroValue(t.Base)
+		}
 	}
 	return "nil"
 }
