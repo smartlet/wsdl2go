@@ -99,6 +99,10 @@ func generateComplexType(c *Context, buf *Buffer, ts []*ComplexType) {
 			continue
 		}
 
+		if degradated(t) {
+			buf.Line("type %s %s\n", Identifier(t.Name), TypeName(t.Base))
+		}
+
 		buf.Line("type %s struct {", Identifier(t.Name))
 		if t.Base != nil {
 			switch bt := t.Base.(type) {

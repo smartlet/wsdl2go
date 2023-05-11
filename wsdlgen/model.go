@@ -134,10 +134,22 @@ func PointerTypeName(t Type) string {
 		return Identifier(t.Name)
 	case *ComplexType:
 		// FIXBUG: any接口
-		if t.Base == nil && len(t.Attributes) == 0 && len(t.Elements) == 0 {
+		if degradated(t) {
 			return Identifier(t.Name)
 		}
 		return "*" + Identifier(t.Name)
 	}
 	panic("invalid type")
+}
+
+func degradated(ct *ComplexType) bool {
+	if len(ct.Attributes) == 0 && len(ct.Elements) == 0 {
+		switch ct.Base.(type) {
+		case BuiltinType:
+			return true
+		case *SimpleType:
+			return true
+		}
+	}
+	return false
 }
