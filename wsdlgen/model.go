@@ -133,8 +133,7 @@ func PointerTypeName(t Type) string {
 	case *SimpleType:
 		return Identifier(t.Name)
 	case *ComplexType:
-		// FIXBUG: any接口
-		if degradated(t) {
+		if degraded(t) {
 			return Identifier(t.Name)
 		}
 		return "*" + Identifier(t.Name)
@@ -142,7 +141,9 @@ func PointerTypeName(t Type) string {
 	panic("invalid type")
 }
 
-func degradated(ct *ComplexType) bool {
+func degraded(ct *ComplexType) bool {
+	// ComplexType能退化为SimpleType的条件: 无attribute, 无element, base非空且类型为BuiltinType或*SimpleType
+	// base为空是abstract=true的.
 	if len(ct.Attributes) == 0 && len(ct.Elements) == 0 {
 		switch ct.Base.(type) {
 		case BuiltinType:
