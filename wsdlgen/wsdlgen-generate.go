@@ -57,7 +57,7 @@ func generateSimpleType(c *Context, buf *Buffer, ts []*SimpleType) {
 			if len(t.Enumeration) > 0 {
 				buf.Line("const (")
 				for _, v := range t.Enumeration {
-					buf.Line("%v%v = %q", gname, Identifier(v), v)
+					buf.Line("%v%v %v = %q", gname, Identifier(v), gname, v)
 				}
 				buf.Line(")")
 			}
