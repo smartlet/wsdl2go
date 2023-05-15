@@ -123,7 +123,8 @@ func analysisNamedElement(c *Context, ns, name string) *Element {
 	sc := c.schemas.Get(ns)
 	for _, e := range sc.Elements {
 		if e.Name == name {
-			return processElement(c, sc, e, &Element{Ns: ns, Name: name}, "")
+			// message的part/element不能有substitutionGroup特性
+			return processElement(c, sc, e, &Element{Ns: ns, Name: name}, "")[0]
 		}
 	}
 
@@ -307,7 +308,7 @@ func processChoice(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, gp *wsdl.C
 	maxOccurs = nvl(gp.MaxOccurs, maxOccurs)
 	if len(gp.Elements) > 0 {
 		for _, i := range gp.Elements {
-			rt.Elements = append(rt.Elements, processElement(c, sc, i, &Element{Ns: sc.TargetNamespace, Name: i.Name}, maxOccurs))
+			rt.Elements = append(rt.Elements, processElement(c, sc, i, &Element{Ns: sc.TargetNamespace, Name: i.Name}, maxOccurs)...)
 		}
 	}
 	if len(gp.Groups) > 0 {
@@ -333,7 +334,7 @@ func processSequence(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, gp *wsdl
 	maxOccurs = nvl(gp.MaxOccurs, maxOccurs)
 	if len(gp.Elements) > 0 {
 		for _, i := range gp.Elements {
-			rt.Elements = append(rt.Elements, processElement(c, sc, i, &Element{Ns: sc.TargetNamespace, Name: i.Name}, maxOccurs))
+			rt.Elements = append(rt.Elements, processElement(c, sc, i, &Element{Ns: sc.TargetNamespace, Name: i.Name}, maxOccurs)...)
 		}
 	}
 	if len(gp.Groups) > 0 {
@@ -353,7 +354,7 @@ func processSequence(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, gp *wsdl
 	}
 }
 
-func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, maxOccurs string) *Element {
+func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, maxOccurs string) []*Element {
 
 	c.trace("processElement: %v", nvl(e.Name, e.Ref))
 
@@ -392,7 +393,23 @@ func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, m
 	} else {
 		panic("invalid type: " + rt.Name)
 	}
-	return rt
+
+	rg := []*Element{rt}
+	// 处理substitutionGroup逻辑
+	if e.SubstitutionGroup == "" {
+		for _, ei := range sc.Elements {
+			if ei.SubstitutionGroup != "" {
+				ns, name := sc.QName(ei.SubstitutionGroup)
+				if ns != sc.TargetNamespace {
+					panic("not local substitutionGroup")
+				}
+				if rt.Name == name {
+					rg = append(rg, processElement(c, sc, ei, &Element{Ns: sc.TargetNamespace, Name: ei.Name}, maxOccurs)...)
+				}
+			}
+		}
+	}
+	return rg
 }
 
 func processGroup(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, gp *wsdl.Group, rt *ComplexType, maxOccurs string) {

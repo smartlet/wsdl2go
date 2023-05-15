@@ -383,19 +383,20 @@ type Sequence struct {
 }
 
 type Element struct {
-	XMLName     xml.Name     `xml:"element"`
-	Id          string       `xml:"id,attr"`
-	Name        string       `xml:"name,attr"`
-	Ref         string       `xml:"ref,attr"`
-	Type        string       `xml:"type,attr"`
-	Default     string       `xml:"default,attr"`
-	Fixed       string       `xml:"fixed,attr"`
-	Use         string       `xml:"use,attr"`
-	MinOccurs   int          `xml:"minOccurs,attr"`
-	MaxOccurs   string       `xml:"maxOccurs,attr"` // can be # or unbounded
-	Nillable    bool         `xml:"nillable,attr"`
-	SimpleType  *SimpleType  `xml:"simpleType"`
-	ComplexType *ComplexType `xml:"complexType"`
+	XMLName           xml.Name     `xml:"element"`
+	Id                string       `xml:"id,attr"`
+	Name              string       `xml:"name,attr"`
+	Ref               string       `xml:"ref,attr"`
+	Type              string       `xml:"type,attr"`
+	Default           string       `xml:"default,attr"`
+	Fixed             string       `xml:"fixed,attr"`
+	Use               string       `xml:"use,attr"`
+	MinOccurs         int          `xml:"minOccurs,attr"`
+	MaxOccurs         string       `xml:"maxOccurs,attr"` // can be # or unbounded
+	Nillable          bool         `xml:"nillable,attr"`
+	SubstitutionGroup string       `xml:"substitutionGroup,attr"` // 支持substitutionGroup特性
+	SimpleType        *SimpleType  `xml:"simpleType"`
+	ComplexType       *ComplexType `xml:"complexType"`
 }
 
 type Message struct {
