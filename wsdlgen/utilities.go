@@ -16,8 +16,9 @@ func Identifier(v string) string {
 			// 首字母大写
 			if i == 0 {
 				sb.WriteRune(c + diff)
+			} else {
+				sb.WriteRune(c)
 			}
-			sb.WriteRune(c)
 		} else if 'A' <= c && c <= 'Z' {
 			sb.WriteRune(c)
 		} else if '0' <= c && c <= '9' {
