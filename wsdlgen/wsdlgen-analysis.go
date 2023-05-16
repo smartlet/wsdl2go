@@ -359,6 +359,9 @@ func processElement(c *Context, sc *wsdl.Schema, e *wsdl.Element, rt *Element, m
 	c.trace("processElement: %v", nvl(e.Name, e.Ref))
 
 	if e.Ref != "" {
+		if e.MaxOccurs != "" {
+			maxOccurs = e.MaxOccurs
+		}
 		ns, name := sc.QName(e.Ref)
 		sc = c.schemas.Get(ns)
 		for _, i := range sc.Elements {
@@ -417,6 +420,9 @@ func processGroup(c *Context, sc *wsdl.Schema, ct *wsdl.ComplexType, gp *wsdl.Gr
 	c.trace("processElement: %v", nvl(gp.Name, gp.Ref))
 
 	if gp.Ref != "" {
+		if gp.MaxOccurs != "" {
+			maxOccurs = gp.MaxOccurs
+		}
 		ns, name := sc.QName(gp.Ref)
 		sc = c.schemas.Get(ns)
 		for _, i := range sc.Groups {
