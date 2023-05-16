@@ -33,7 +33,7 @@ type XsGDay string
 type XsGMonth string
 
 // XsBoolean https://www.w3.org/TR/xmlschema-2/#boolean
-type XsBoolean bool
+type XsBoolean *bool // 支持三值逻辑(true|false|nil)
 
 // XsBase64Binary https://www.w3.org/TR/xmlschema-2/#base64Binary
 type XsBase64Binary []byte
