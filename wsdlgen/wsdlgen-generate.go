@@ -66,13 +66,36 @@ func generateSimpleType(c *Context, buf *Buffer, ts []*SimpleType) {
 
 		} else if t.Union != nil {
 			types := NewBuffer(128)
+			bases := make(map[string]any)
 			for i, v := range t.Union {
+				switch vt := v.(type) {
+				case BuiltinType:
+					bases[TypeName(vt)] = nil
+				case *SimpleType:
+					bases[TypeName(vt.Base)] = nil
+				default:
+					panic("invalid union type")
+				}
 				if i > 0 {
 					types.WriteByte('|')
 				}
 				types.WriteString(TypeName(v))
 			}
-			buf.Line("type %s any // union(%s)", gname, types)
+
+			base := "any"
+			if len(bases) == 1 {
+				for k, _ := range bases {
+					base = k
+				}
+			} else {
+				for k, _ := range bases {
+					if k == "XsString" {
+						base = k
+					}
+				}
+			}
+
+			buf.Line("type %s %s // union(%s)", gname, base, types)
 		} else {
 			panic("invalid simpleType base")
 		}
